@@ -1,0 +1,1705 @@
+<!doctype html>
+<html lang="en" id="html-root">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SnapID.Pro | AI Powered</title>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+
+    <!-- ⚡ FOUC Prevention: apply saved/system theme before page renders -->
+    <script>
+      (function () {
+        try {
+          var saved = localStorage.getItem('snapid-theme');
+          var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+          if (saved === 'dark' || (!saved && prefersDark)) {
+            document.documentElement.classList.add('dark');
+          } else {
+            document.documentElement.classList.remove('dark');
+          }
+        } catch (e) {
+          console.warn('LocalStorage blocked or unavailable:', e);
+        }
+      })();
+    </script>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>tailwind.config = { darkMode: 'class' };</script>
+
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="icon" href="/assets/icon.png" type="image/png" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+
+    <style>
+      /* =========================================================
+         SEMANTIC DESIGN TOKENS — LIGHT MODE (default)
+      ========================================================= */
+      :root {
+        --bg-primary:         #F8FAFC;
+        --bg-secondary:       #EFF3F8;
+        --surface:            #FFFFFF;
+        --surface-elevated:   #FFFFFF;
+        --text-primary:       #0F172A;
+        --text-secondary:     #475569;
+        --text-muted:         #94A3B8;
+        --border:             #CBD5E1;
+        --border-subtle:      #E2E8F0;
+        --accent:             #6366F1;
+        --accent-hover:       #4F46E5;
+        --accent-muted:       rgba(99, 102, 241, 0.10);
+        --accent-border:      rgba(99, 102, 241, 0.28);
+        --success:            #10B981;
+        --danger:             #F43F5E;
+        --glass-bg:           rgba(255, 255, 255, 0.78);
+        --glass-border:       rgba(0, 0, 0, 0.09);
+        --shadow-sm:          0 1px 3px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.04);
+        --shadow-md:          0 4px 16px rgba(0,0,0,0.09);
+        --shadow-lg:          0 12px 40px rgba(0,0,0,0.12);
+        --input-bg:           #FFFFFF;
+        --input-border:       #CBD5E1;
+        --input-text:         #0F172A;
+        --input-placeholder:  #94A3B8;
+        --step-dot-bg:        #CBD5E1;
+        --step-line-bg:       #E2E8F0;
+        --scrollbar-track:    #EFF3F8;
+        --scrollbar-thumb:    #CBD5E1;
+        --scrollbar-hover:    #94A3B8;
+        --orb-opacity:        0.06;
+        --modal-overlay:      rgba(15, 23, 42, 0.55);
+        --cancel-btn-border:  #CBD5E1;
+        --cancel-btn-text:    #475569;
+        --cancel-btn-hover:   rgba(0, 0, 0, 0.04);
+        --card-meta-bg:       #F1F5F9;
+        --card-meta-border:   #E2E8F0;
+        --copies-text:        #0F172A;
+      }
+
+      /* =========================================================
+         SEMANTIC DESIGN TOKENS — DARK MODE
+      ========================================================= */
+      html.dark {
+        --bg-primary:         #0B0F19;
+        --bg-secondary:       #111827;
+        --surface:            #0F172A;
+        --surface-elevated:   #1E293B;
+        --text-primary:       #E6EAF2;
+        --text-secondary:     #94A3B8;
+        --text-muted:         #64748B;
+        --border:             #1E293B;
+        --border-subtle:      #0F172A;
+        --accent:             #6366F1;
+        --accent-hover:       #818CF8;
+        --accent-muted:       rgba(99, 102, 241, 0.15);
+        --accent-border:      rgba(99, 102, 241, 0.38);
+        --success:            #10B981;
+        --danger:             #F43F5E;
+        --glass-bg:           rgba(15, 23, 42, 0.78);
+        --glass-border:       rgba(255, 255, 255, 0.07);
+        --shadow-sm:          0 1px 3px rgba(0,0,0,0.35);
+        --shadow-md:          0 4px 16px rgba(0,0,0,0.45);
+        --shadow-lg:          0 12px 40px rgba(0,0,0,0.65);
+        --input-bg:           rgba(15, 23, 42, 0.65);
+        --input-border:       rgba(51, 65, 85, 0.85);
+        --input-text:         #E6EAF2;
+        --input-placeholder:  #475569;
+        --step-dot-bg:        #334155;
+        --step-line-bg:       #1E293B;
+        --scrollbar-track:    #020617;
+        --scrollbar-thumb:    #334155;
+        --scrollbar-hover:    #475569;
+        --orb-opacity:        0.12;
+        --modal-overlay:      rgba(2, 6, 23, 0.90);
+        --cancel-btn-border:  #334155;
+        --cancel-btn-text:    #94A3B8;
+        --cancel-btn-hover:   rgba(255, 255, 255, 0.05);
+        --card-meta-bg:       rgba(15, 23, 42, 0.55);
+        --card-meta-border:   rgba(255, 255, 255, 0.05);
+        --copies-text:        #E6EAF2;
+      }
+
+      * { box-sizing: border-box; }
+
+      /* =========================================================
+         SMOOTH THEME TRANSITIONS (300ms)
+      ========================================================= */
+      body,
+      header, main, section, footer,
+      .glass, .photo-card, .enhance-btn,
+      .step-dot, .step-line, .drop-zone-inner,
+      input, textarea, button, select,
+      #notification, .cancel-btn-themed,
+      .card-meta-bg, .theme-toggle {
+        transition-property: background-color, color, border-color, box-shadow, opacity;
+        transition-duration: 300ms;
+        transition-timing-function: ease-in-out;
+      }
+
+      body {
+        font-family: "Plus Jakarta Sans", sans-serif;
+        background-color: var(--bg-primary);
+        color: var(--text-primary);
+        overflow-x: hidden;
+        opacity: 0;
+        animation: pageReveal 0.6s ease forwards 0.1s;
+      }
+
+      @keyframes pageReveal { to { opacity: 1; } }
+
+      /* ---- Particles ---- */
+      #particles-js {
+        position: fixed;
+        inset: 0;
+        z-index: -1;
+      }
+
+      /* ---- Background Orbs ---- */
+      .bg-orb {
+        position: fixed;
+        border-radius: 50%;
+        filter: blur(120px);
+        pointer-events: none;
+        z-index: -1;
+        opacity: var(--orb-opacity);
+        transition: opacity 0.4s ease-in-out;
+      }
+      .bg-orb-1 { width:600px;height:600px;background:radial-gradient(circle,#6366f1,transparent 70%);top:-200px;left:-150px;animation:orbFloat1 18s ease-in-out infinite; }
+      .bg-orb-2 { width:500px;height:500px;background:radial-gradient(circle,#a855f7,transparent 70%);bottom:-100px;right:-100px;animation:orbFloat2 22s ease-in-out infinite; }
+      .bg-orb-3 { width:350px;height:350px;background:radial-gradient(circle,#06b6d4,transparent 70%);top:50%;left:60%;animation:orbFloat3 15s ease-in-out infinite; }
+
+      @keyframes orbFloat1 { 0%,100%{transform:translate(0,0) scale(1)} 33%{transform:translate(60px,80px) scale(1.05)} 66%{transform:translate(-40px,40px) scale(0.95)} }
+      @keyframes orbFloat2 { 0%,100%{transform:translate(0,0) scale(1)} 50%{transform:translate(-80px,-60px) scale(1.1)} }
+      @keyframes orbFloat3 { 0%,100%{transform:translate(0,0) scale(1)} 40%{transform:translate(50px,-70px) scale(1.08)} 80%{transform:translate(-30px,30px) scale(0.92)} }
+
+      /* ---- Glass ---- */
+      .glass {
+        background: var(--glass-bg);
+        backdrop-filter: blur(18px);
+        -webkit-backdrop-filter: blur(18px);
+        border: 1px solid var(--glass-border);
+        box-shadow: var(--shadow-md);
+      }
+
+      /* ---- Primary Button ---- */
+      .btn-primary {
+        background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+      }
+      .btn-primary::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(135deg, #818cf8 0%, #c084fc 100%);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        border-radius: inherit;
+      }
+      .btn-primary:hover::after { opacity: 1; }
+      .btn-primary > * { position: relative; z-index: 2; }
+      .btn-primary span, .btn-primary svg { position: relative; z-index: 2; }
+      .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 12px 32px -8px rgba(99,102,241,0.6), 0 0 0 1px rgba(99,102,241,0.3); }
+      .btn-primary:active { transform: translateY(0); }
+      .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none !important; box-shadow: none !important; }
+
+      /* ---- Cancel / Secondary Button ---- */
+      .cancel-btn-themed {
+        border: 1px solid var(--cancel-btn-border);
+        color: var(--cancel-btn-text);
+        background: transparent;
+        font-weight: 700;
+      }
+      .cancel-btn-themed:hover {
+        background: var(--cancel-btn-hover);
+        border-color: var(--text-muted);
+        color: var(--text-primary);
+      }
+
+      /* ---- Themed Input ---- */
+      .input-themed {
+        background: var(--input-bg);
+        border: 1px solid var(--input-border);
+        color: var(--input-text);
+      }
+      .input-themed::placeholder { color: var(--input-placeholder); }
+      .input-themed:focus {
+        outline: none;
+        border-color: rgba(99,102,241,0.55);
+        box-shadow: 0 0 0 3px rgba(99,102,241,0.14);
+      }
+
+      /* ---- Ripple ---- */
+      .ripple {
+        position: absolute;
+        border-radius: 50%;
+        background: rgba(255,255,255,0.3);
+        transform: scale(0);
+        animation: rippleAnim 0.6s linear;
+        pointer-events: none;
+        z-index: 10;
+      }
+      @keyframes rippleAnim { to { transform: scale(4); opacity: 0; } }
+
+      /* ---- Photo Cards ---- */
+      .photo-card {
+        background: var(--surface-elevated);
+        border: 1px solid var(--border);
+        box-shadow: var(--shadow-sm);
+        animation: cardEnter 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+      }
+      .photo-card:hover {
+        border-color: var(--accent-border) !important;
+        box-shadow: 0 0 40px -12px rgba(99,102,241,0.2), var(--shadow-md);
+        transform: translateY(-1px);
+      }
+      @keyframes cardEnter {
+        from { opacity: 0; transform: translateY(20px) scale(0.97); }
+        to   { opacity: 1; transform: translateY(0) scale(1); }
+      }
+
+      /* ---- Card Meta (copies container) ---- */
+      .card-meta-bg {
+        background: var(--card-meta-bg);
+        border: 1px solid var(--card-meta-border);
+      }
+      .card-meta-input {
+        background: transparent;
+        color: var(--copies-text);
+        width: 2.5rem;
+        text-align: center;
+        font-size: 0.875rem;
+        font-weight: 700;
+      }
+      .card-meta-input:focus { outline: none; }
+
+      /* ---- Drop Zone ---- */
+      .drop-zone-inner {
+        background: var(--surface);
+        border-color: var(--border);
+      }
+      .drop-zone-inner:hover {
+        border-color: rgba(99,102,241,0.5) !important;
+        box-shadow: 0 0 50px -10px rgba(99,102,241,0.12);
+      }
+      .drop-zone-inner.drag-over {
+        border-color: #6366f1 !important;
+        box-shadow: 0 0 60px -8px rgba(99,102,241,0.25);
+        background: var(--accent-muted) !important;
+      }
+      .upload-icon { animation: iconFloat 3s ease-in-out infinite; }
+      @keyframes iconFloat { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-6px)} }
+
+      /* ---- Entrance Animations ---- */
+      .animate-enter { opacity:0;transform:translateY(24px);animation:enterUp 0.6s cubic-bezier(0.22,1,0.36,1) forwards; }
+      @keyframes enterUp { to { opacity: 1; transform: translateY(0); } }
+
+      /* ---- Gradient Heading ---- */
+      .animate-gradient { background-size:200% 200%;animation:gradientShift 6s ease infinite; }
+      @keyframes gradientShift { 0%{background-position:0% 50%} 50%{background-position:100% 50%} 100%{background-position:0% 50%} }
+
+      /* ---- Processing Steps ---- */
+      .step-item { transition:all 0.4s ease;opacity:0.3; }
+      .step-item.active { opacity:1; }
+      .step-item.done  { opacity:0.6; }
+      .step-dot {
+        width:8px; height:8px; border-radius:50%;
+        background: var(--step-dot-bg);
+        flex-shrink:0;
+      }
+      .step-item.active .step-dot { background:#6366f1; box-shadow:0 0 10px rgba(99,102,241,0.8); animation:stepPulse 1s ease-in-out infinite; }
+      .step-item.done  .step-dot  { background:#10b981; }
+      @keyframes stepPulse { 0%,100%{box-shadow:0 0 6px rgba(99,102,241,0.6)} 50%{box-shadow:0 0 16px rgba(99,102,241,1)} }
+      .step-line { flex:1; height:1px; background:var(--step-line-bg); }
+      .step-line.done { background:#10b981; }
+
+      /* ---- Dot Bounce Spinner ---- */
+      .dot-anim span { display:inline-block; animation:dotBounce 1.4s ease-in-out infinite; }
+      .dot-anim span:nth-child(2) { animation-delay:0.2s; }
+      .dot-anim span:nth-child(3) { animation-delay:0.4s; }
+      @keyframes dotBounce { 0%,80%,100%{transform:scale(0.6);opacity:0.4} 40%{transform:scale(1);opacity:1} }
+
+      /* ---- Download Arrow ---- */
+      .download-arrow { animation:arrowBounce 1.6s ease-in-out infinite; }
+      @keyframes arrowBounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(3px)} }
+
+      /* ---- Notification ---- */
+      #notification {
+        background: var(--surface-elevated);
+        border: 1px solid var(--border);
+        box-shadow: var(--shadow-lg);
+        transition: transform 0.5s cubic-bezier(0.34,1.56,0.64,1), background-color 0.3s ease, border-color 0.3s ease;
+      }
+
+      /* ---- Modal Overlay ---- */
+      .cropper-modal-overlay {
+        position: fixed;
+        inset: 0;
+        background: var(--modal-overlay);
+        z-index: 100;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        transition: background-color 0.3s ease;
+      }
+
+      /* ---- Scrollbar ---- */
+      ::-webkit-scrollbar { width: 6px; }
+      ::-webkit-scrollbar-track { background: var(--scrollbar-track); }
+      ::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 10px; }
+      ::-webkit-scrollbar-thumb:hover { background: var(--scrollbar-hover); }
+
+      /* ---- Badge Pulse ---- */
+      @keyframes badgePulse { 0%,100%{box-shadow:0 0 0 0 rgba(99,102,241,0.3)} 50%{box-shadow:0 0 0 6px rgba(99,102,241,0)} }
+      .api-badge { animation: badgePulse 3s ease-in-out infinite; }
+
+      /* ---- Enhance Mode Buttons ---- */
+      .enhance-btn {
+        background: var(--surface-elevated);
+        border: 1px solid var(--border);
+        color: var(--text-secondary);
+      }
+      .enhance-btn:hover {
+        border-color: var(--accent-border);
+        color: var(--accent);
+        background: var(--accent-muted);
+      }
+      .enhance-btn.active-mode {
+        background: var(--accent-muted);
+        border-color: var(--accent-border);
+        color: var(--accent);
+        box-shadow: 0 0 16px -4px rgba(99,102,241,0.3);
+      }
+      html.dark .enhance-btn.active-mode { color: #c7d2fe; }
+
+      /* ---- Detected Mode Pill ---- */
+      .detected-pill {
+        display: inline-flex; align-items: center; gap: 6px;
+        padding: 4px 10px; border-radius: 999px;
+        font-size: 10px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase;
+        background: var(--accent-muted);
+        border: 1px solid var(--accent-border);
+        color: var(--accent);
+        animation: enterUp 0.4s ease forwards;
+      }
+
+      /* ---- Theme Toggle Button ---- */
+      .theme-toggle {
+        position: relative;
+        width: 42px; height: 42px;
+        border-radius: 11px;
+        background: var(--surface-elevated);
+        border: 1px solid var(--border);
+        display: flex; align-items: center; justify-content: center;
+        cursor: pointer;
+        color: var(--text-secondary);
+        box-shadow: var(--shadow-sm);
+        flex-shrink: 0;
+      }
+      .theme-toggle:hover {
+        border-color: var(--accent-border);
+        color: var(--accent);
+        background: var(--accent-muted);
+        box-shadow: 0 0 12px -2px rgba(99,102,241,0.25);
+      }
+      .theme-toggle svg {
+        width: 18px; height: 18px;
+        transition: transform 0.45s cubic-bezier(0.34,1.56,0.64,1), opacity 0.25s ease;
+      }
+      /* Icon positioning */
+      .theme-toggle .icon-sun,
+      .theme-toggle .icon-moon { position: absolute; }
+      /* Light mode: show sun */
+      .icon-sun  { opacity:1; transform:rotate(0deg) scale(1); }
+      .icon-moon { opacity:0; transform:rotate(90deg) scale(0.5); }
+      /* Dark mode: show moon */
+      html.dark .icon-sun  { opacity:0; transform:rotate(-90deg) scale(0.5); }
+      html.dark .icon-moon { opacity:1; transform:rotate(0deg) scale(1); }
+
+      /* ---- Token Gate ---- */
+      #tokenGate {
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+        background: var(--bg-primary);
+      }
+      #tokenGate.hidden { display: none; }
+      .token-input-wrap { position: relative; }
+      .token-input-wrap input {
+        letter-spacing: 0.12em;
+        font-family: "Plus Jakarta Sans", monospace;
+        text-transform: uppercase;
+      }
+      .token-input-wrap input::placeholder { letter-spacing: 0.04em; text-transform: none; }
+
+      /* ---- Add-more button hover ---- */
+      #addMoreBtn:hover {
+        border-color: var(--text-muted) !important;
+        color: var(--text-primary) !important;
+        background: var(--cancel-btn-hover);
+      }
+
+      /* ---- Enhanced Loading UI ---- */
+      .progress-outer {
+        width: 100%;
+        height: 6px;
+        background: var(--bg-secondary);
+        border-radius: 999px;
+        overflow: hidden;
+        border: 1px solid var(--border-subtle);
+      }
+      .progress-inner {
+        height: 100%;
+        width: 0%;
+        background: linear-gradient(90deg, #6366f1, #a855f7, #6366f1);
+        background-size: 200% 100%;
+        animation: progressFlow 2s linear infinite;
+        transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 0 12px rgba(99, 102, 241, 0.4);
+      }
+      @keyframes progressFlow {
+        0% { background-position: 0% 0%; }
+        100% { background-position: -200% 0%; }
+      }
+      .perf-metric {
+        font-family: monospace;
+        font-size: 10px;
+        letter-spacing: 0.05em;
+        color: var(--text-muted);
+        animation: metricPulse 2s ease-in-out infinite;
+      }
+      @keyframes metricPulse {
+        0%, 100% { opacity: 0.7; }
+        50% { opacity: 1; color: var(--accent); }
+      }
+    </style>
+  </head>
+  <body oncontextmenu="return false;">
+
+    <!-- ===== TOKEN GATE ===== -->
+    <div id="tokenGate" class="{{ 'hidden' if authenticated else '' }}">
+      <!-- Orbs inside gate too -->
+      <div class="bg-orb bg-orb-1"></div>
+      <div class="bg-orb bg-orb-2"></div>
+      <div class="bg-orb bg-orb-3"></div>
+
+      <div class="glass rounded-3xl p-10 max-w-md w-full shadow-2xl animate-enter" style="animation-delay:0.1s">
+        <!-- Logo -->
+        <div class="flex flex-col items-center mb-8">
+          <img src="/assets/icon.png" class="w-16 h-16 object-contain mb-4" alt="SnapID.Pro" />
+          <h1 class="text-2xl font-extrabold tracking-tight" style="color:var(--text-primary)">
+            SnapID<span style="color:var(--accent)">.Pro</span>
+          </h1>
+          <p class="text-[10px] font-bold uppercase tracking-widest mt-1" style="color:var(--text-muted)">Access Required</p>
+        </div>
+
+        <!-- Description -->
+        <div class="rounded-2xl px-5 py-4 mb-6 text-center" style="background:var(--accent-muted); border:1px solid var(--accent-border)">
+          <p class="text-sm font-medium leading-relaxed" style="color:var(--text-secondary)">
+            Enter your access token to use SnapID.Pro. Tokens can be obtained from the developer.
+          </p>
+        </div>
+
+        <!-- Token Input -->
+        <div class="space-y-4">
+          <div class="token-input-wrap space-y-2">
+            <!-- Honeypot field (hidden from users) -->
+            <input type="text" id="hp_field" tabindex="-1" autocomplete="off" style="display:none !important" />
+            
+            <label class="text-[10px] font-bold uppercase tracking-widest" style="color:var(--text-muted)">Access Token</label>
+            <input id="tokenInput" type="text" placeholder="e.g. SNAP-LIFE-XXXXXXXX"
+              class="input-themed w-full rounded-xl px-4 py-3.5 text-sm font-bold"
+              autocomplete="off" spellcheck="false" />
+          </div>
+          <p id="tokenError" class="text-xs font-bold hidden" style="color:var(--danger)">
+            ❌ Invalid or expired token. Please try again.
+          </p>
+          <button id="tokenSubmitBtn"
+            class="w-full btn-primary py-4 rounded-xl font-bold text-white flex items-center justify-center gap-2.5">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="pointer-events:none">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/>
+            </svg>
+            <span>Unlock Access</span>
+          </button>
+        </div>
+
+        <!-- Footer hint -->
+        <div class="flex flex-col items-center gap-3 mt-6">
+          <p class="text-center text-[10px] font-bold uppercase tracking-widest" style="color:var(--text-muted)">
+            Need a token? Contact via WhatsApp
+          </p>
+          <a href="https://wa.me/9779762122348" target="_blank" rel="noopener noreferrer"
+             class="flex items-center gap-2 px-6 py-2.5 rounded-xl text-xs font-bold transition-all duration-200"
+             style="background:var(--accent-muted); border:1px solid var(--accent-border); color:var(--accent)"
+             onmouseover="this.style.background='var(--accent)';this.style.color='#fff';this.style.borderColor='var(--accent)'"
+             onmouseout="this.style.background='var(--accent-muted)';this.style.color='var(--accent)';this.style.borderColor='var(--accent-border)'">
+            <svg class="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24" style="pointer-events:none">
+              <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
+              <path d="M12 0C5.373 0 0 5.373 0 12c0 2.124.558 4.117 1.535 5.845L.057 23.5l5.821-1.527A11.94 11.94 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.93 0-3.74-.518-5.295-1.424l-.378-.224-3.925 1.03 1.047-3.816-.246-.393A9.956 9.956 0 012 12C2 6.478 6.478 2 12 2s10 4.478 10 10-4.478 10-10 10z"/>
+            </svg>
+            Chat with Developer
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Particle Background -->
+    <div id="particles-js"></div>
+
+    <!-- Background Orbs -->
+    <div class="bg-orb bg-orb-1"></div>
+    <div class="bg-orb bg-orb-2"></div>
+    <div class="bg-orb bg-orb-3"></div>
+
+    <!-- ===== HEADER ===== -->
+    <header class="sticky top-0 z-50 glass animate-enter" style="border-bottom: 1px solid var(--border); animation-delay:0.05s">
+      <div class="container mx-auto px-6 h-20 flex items-center justify-between">
+
+        <!-- Logo -->
+        <div class="flex items-center gap-3">
+          <img src="/assets/icon.png" class="w-10 h-10 object-contain flex-shrink-0" alt="SnapID.Pro logo" />
+          <span class="text-xl font-extrabold tracking-tight" style="color:var(--text-primary)">
+            SnapID<span style="color:var(--accent)" class="font-medium">.Pro</span>
+          </span>
+        </div>
+
+        <!-- Right side: badge + toggle -->
+        <div class="flex items-center gap-3">
+          <div class="hidden md:flex items-center gap-2 px-4 py-1.5 rounded-full api-badge"
+               style="background:var(--accent-muted); border:1px solid var(--accent-border)">
+            <span class="w-2 h-2 rounded-full animate-pulse" style="background:var(--accent)"></span>
+            <span class="text-xs font-semibold" style="color:var(--accent)">AI Enhancement Active</span>
+          </div>
+
+          <!-- Theme Toggle -->
+          <button id="themeToggle" class="theme-toggle" title="Toggle theme" aria-label="Toggle dark/light mode">
+            <!-- Sun (visible in light mode) -->
+            <svg class="icon-sun" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="pointer-events:none">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707M17.657 17.657l-.707-.707M6.343 6.343l-.707-.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
+            </svg>
+            <!-- Moon (visible in dark mode) -->
+            <svg class="icon-moon" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="pointer-events:none">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- ===== HERO ===== -->
+    <section class="container mx-auto px-6 pt-14 pb-8">
+      <div class="max-w-4xl mx-auto text-center">
+        <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full mb-6 animate-enter"
+             style="background:var(--accent-muted); border:1px solid var(--accent-border); animation-delay:0.15s">
+          <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"
+               style="pointer-events:none; color:var(--accent)">
+            <path fill-rule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clip-rule="evenodd"/>
+          </svg>
+          <span class="text-xs font-bold uppercase tracking-widest" style="color:var(--accent)">AI-Powered Background Removal</span>
+        </div>
+
+        <h1 class="text-4xl md:text-6xl font-extrabold mb-6 tracking-tight leading-tight animate-enter"
+            style="animation-delay:0.2s; color:var(--text-primary)">
+          Professional Passport Photos<br/>
+          <span class="bg-gradient-to-r from-indigo-400 via-purple-400 to-cyan-400 bg-clip-text text-transparent animate-gradient">
+            by SnapID.Pro
+          </span>
+        </h1>
+        <p class="text-lg md:text-xl mb-10 max-w-2xl mx-auto leading-relaxed animate-enter"
+           style="animation-delay:0.3s; color:var(--text-secondary)">
+          Crop, enhance, and generate print-ready passport sheets in seconds with industry-leading AI.
+        </p>
+      </div>
+    </section>
+
+    <!-- ===== MAIN CONTENT ===== -->
+    <main class="container mx-auto px-6 pb-24">
+      <div class="max-w-4xl mx-auto space-y-6">
+
+        <!-- Upload Drop Zone -->
+        <div id="dropZone" class="relative cursor-pointer animate-enter" style="animation-delay:0.4s">
+          <input type="file" id="imageInput" class="hidden" accept="image/*" multiple />
+          <div class="drop-zone-inner rounded-3xl p-12 border-2 border-dashed text-center" style="transition: all 0.3s cubic-bezier(0.4,0,0.2,1)">
+            <div class="upload-icon w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-6"
+                 style="background:var(--accent-muted)">
+              <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                   style="pointer-events:none; color:var(--accent)">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                  d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+              </svg>
+            </div>
+            <h3 class="text-2xl font-bold mb-2" style="color:var(--text-primary)">Drop your photos here</h3>
+            <p class="mb-0" style="color:var(--text-secondary)">
+              Drag and drop or
+              <span style="color:var(--accent)" class="font-semibold cursor-pointer hover:opacity-75 transition-opacity">browse files</span>
+            </p>
+            <p class="text-xs mt-4 uppercase tracking-widest font-bold" style="color:var(--text-muted)">JPG · PNG · WEBP</p>
+            <div class="flex items-center gap-4 mt-6 justify-center">
+              <div class="flex-1 h-px max-w-[80px]" style="background:var(--border)"></div>
+              <span class="text-[10px] font-bold uppercase tracking-widest" style="color:var(--text-muted)">or</span>
+              <div class="flex-1 h-px max-w-[80px]" style="background:var(--border)"></div>
+            </div>
+            <button id="openCameraBtn"
+              class="mt-5 inline-flex items-center gap-2.5 px-6 py-3 rounded-2xl font-bold text-sm transition-all duration-200"
+              style="background:var(--accent-muted); border:1px solid var(--accent-border); color:var(--accent)"
+              onclick="event.stopPropagation()">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="pointer-events:none">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/>
+              </svg>
+              Take Photo with Camera
+            </button>
+          </div>
+        </div>
+
+        <!-- Photo Cards List -->
+        <div id="photoList" class="grid grid-cols-1 gap-3"></div>
+
+        <div id="addMoreWrapper" class="hidden text-center">
+          <button id="addMoreBtn" class="px-6 py-2.5 rounded-full text-sm font-semibold transition-all duration-200"
+                  style="border:1px solid var(--border); color:var(--text-secondary)">
+            + Add more photos
+          </button>
+        </div>
+
+        <!-- Controls Panel -->
+        <div class="glass rounded-3xl p-8 animate-enter" style="animation-delay:0.5s">
+          <div class="flex flex-col gap-6">
+
+            <!-- Panel Header -->
+            <div class="flex items-center justify-between pb-5" style="border-bottom:1px solid var(--border)">
+              <h4 class="text-lg font-bold" style="color:var(--text-primary)">Configuration</h4>
+              <button id="toggleAdvanced" class="text-sm font-semibold flex items-center gap-1.5 hover:opacity-75 transition-opacity"
+                      style="color:var(--accent)">
+                <svg id="advancedChevron" class="w-4 h-4 transition-transform duration-300"
+                     fill="none" stroke="currentColor" viewBox="0 0 24 24" style="pointer-events:none">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                </svg>
+                Advanced Settings
+              </button>
+            </div>
+
+            <!-- Advanced Fields -->
+            <div id="advancedOptions" class="hidden">
+              <div class="grid grid-cols-2 md:grid-cols-4 gap-5">
+                <div class="space-y-2">
+                  <label class="text-[10px] font-bold uppercase tracking-widest" style="color:var(--text-muted)">Width (px)</label>
+                  <input type="number" id="width" value="390" class="input-themed w-full rounded-xl px-4 py-3 text-sm" />
+                </div>
+                <div class="space-y-2">
+                  <label class="text-[10px] font-bold uppercase tracking-widest" style="color:var(--text-muted)">Height (px)</label>
+                  <input type="number" id="height" value="480" class="input-themed w-full rounded-xl px-4 py-3 text-sm" />
+                </div>
+                <div class="space-y-2">
+                  <label class="text-[10px] font-bold uppercase tracking-widest" style="color:var(--text-muted)">Spacing (px)</label>
+                  <input type="number" id="spacing" value="10" class="input-themed w-full rounded-xl px-4 py-3 text-sm" />
+                </div>
+                <div class="space-y-2">
+                  <label class="text-[10px] font-bold uppercase tracking-widest" style="color:var(--text-muted)">Border (px)</label>
+                  <input type="number" id="border" value="2" class="input-themed w-full rounded-xl px-4 py-3 text-sm" />
+                </div>
+              </div>
+            </div>
+
+            <!-- Enhance Mode Selector -->
+            <div class="space-y-3">
+              <div class="flex items-center justify-between">
+                <label class="text-[10px] font-bold uppercase tracking-widest" style="color:var(--text-muted)">Enhance Mode</label>
+                <span id="detectedModeLabel" class="detected-pill hidden"></span>
+              </div>
+              <div class="flex flex-wrap gap-2" id="enhanceModeGroup">
+                <button type="button" class="enhance-btn active-mode flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-bold" data-mode="auto">✨ Auto Detect</button>
+                <button type="button" class="enhance-btn flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-bold" data-mode="dark">🌙 Brighten</button>
+                <button type="button" class="enhance-btn flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-bold" data-mode="warm">🎨 Fix Color</button>
+                <button type="button" class="enhance-btn flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-bold" data-mode="normal">⚖️ Natural</button>
+              </div>
+            </div>
+
+            <!-- CTA Buttons -->
+            <div class="flex flex-col sm:flex-row gap-4">
+              <button id="generateBtn"
+                class="flex-1 btn-primary text-white font-bold py-4 px-8 rounded-2xl flex items-center justify-center gap-2.5">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="pointer-events:none">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+                Generate Print Sheet
+              </button>
+              <a id="downloadBtn" href="#" download="passport-sheet.pdf"
+                class="flex-1 bg-emerald-500 hover:bg-emerald-400 text-white font-bold py-4 px-8 rounded-2xl flex items-center justify-center gap-2.5 hidden transition-all duration-300 hover:shadow-lg hover:shadow-emerald-500/25 hover:-translate-y-0.5">
+                <svg class="w-5 h-5 download-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="pointer-events:none">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                </svg>
+                Download PDF
+              </a>
+            </div>
+
+            <!-- Processing Steps -->
+            <div id="loading" class="hidden">
+              <div class="space-y-5 bg-black/5 dark:bg-white/5 p-6 rounded-3xl border border-white/10">
+                <div class="flex items-center justify-between mb-1">
+                  <div class="flex items-center gap-2">
+                    <span id="estTimeLabel" class="text-[10px] font-bold uppercase tracking-widest text-indigo-400">Est. 12s remaining</span>
+                  </div>
+                  <span id="perfSpeed" class="perf-metric">SPEED: 842.4 MB/s</span>
+                </div>
+
+                <!-- Modern Progress Bar -->
+                <div class="progress-outer">
+                  <div id="progressBar" class="progress-inner"></div>
+                </div>
+
+                <div class="flex items-center gap-2 pt-2">
+                  <div id="step1" class="step-item flex items-center gap-2 flex-1">
+                    <div class="step-dot"></div>
+                    <span class="text-[10px] font-bold uppercase tracking-wider whitespace-nowrap" style="color:var(--text-secondary)">Removing BG</span>
+                  </div>
+                  <div id="line1" class="step-line"></div>
+                  <div id="step2" class="step-item flex items-center gap-2 flex-1">
+                    <div class="step-dot"></div>
+                    <span class="text-[10px] font-bold uppercase tracking-wider whitespace-nowrap" style="color:var(--text-secondary)">Enhancing</span>
+                  </div>
+                  <div id="line2" class="step-line"></div>
+                  <div id="step3" class="step-item flex items-center gap-2 flex-1">
+                    <div class="step-dot"></div>
+                    <span class="text-[10px] font-bold uppercase tracking-wider whitespace-nowrap" style="color:var(--text-secondary)">Bundling PDF</span>
+                  </div>
+                </div>
+
+                <div class="flex items-center justify-center gap-3 pt-2" style="color:var(--accent)">
+                  <svg class="animate-spin h-4 w-4 flex-shrink-0" viewBox="0 0 24 24" style="pointer-events:none">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  <span id="loadingMsg" class="text-sm font-bold tracking-wide">
+                    Initializing AI Engine<span class="dot-anim"><span>.</span><span>.</span><span>.</span></span>
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- PDF Preview Area -->
+        <div id="previewArea" class="hidden animate-enter">
+          <h4 class="text-center text-[10px] font-bold uppercase tracking-widest mb-4" style="color:var(--text-muted)">Live Preview</h4>
+          <div class="glass rounded-3xl p-4" style="border-color:var(--border)">
+            <embed id="pdfPreview" type="application/pdf" class="w-full h-[600px] rounded-2xl" />
+          </div>
+        </div>
+
+      </div>
+    </main>
+
+    <!-- ===== FOOTER ===== -->
+    <footer class="glass mt-0" style="border-top:1px solid var(--border)">
+      <div class="container mx-auto px-6 py-8">
+        <div class="flex flex-col md:flex-row items-center justify-between gap-6">
+
+          <!-- Brand -->
+          <div class="flex items-center gap-3">
+            <img src="/assets/icon.png" class="w-9 h-9 object-contain" alt="SnapID.Pro" />
+            <div>
+              <p class="text-base font-extrabold tracking-tight" style="color:var(--text-primary)">
+                SnapID<span style="color:var(--accent)">.Pro</span>
+              </p>
+              <p class="text-[10px] font-bold uppercase tracking-widest" style="color:var(--text-muted)">AI Passport Photo Generator</p>
+            </div>
+          </div>
+
+          <!-- Contact Links -->
+          <div class="flex flex-wrap items-center justify-center gap-3">
+
+            <!-- WhatsApp -->
+            <a href="https://wa.me/9779762122348" target="_blank" rel="noopener noreferrer"
+               class="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all duration-200"
+               style="background:var(--accent-muted); border:1px solid var(--accent-border); color:var(--accent)"
+               onmouseover="this.style.background='var(--accent)';this.style.color='#fff';this.style.borderColor='var(--accent)'"
+               onmouseout="this.style.background='var(--accent-muted)';this.style.color='var(--accent)';this.style.borderColor='var(--accent-border)'">
+              <svg class="w-3.5 h-3.5 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24" style="pointer-events:none">
+                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
+                <path d="M12 0C5.373 0 0 5.373 0 12c0 2.124.558 4.117 1.535 5.845L.057 23.5l5.821-1.527A11.94 11.94 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.93 0-3.74-.518-5.295-1.424l-.378-.224-3.925 1.03 1.047-3.816-.246-.393A9.956 9.956 0 012 12C2 6.478 6.478 2 12 2s10 4.478 10 10-4.478 10-10 10z"/>
+              </svg>
+              +977 9762122348
+            </a>
+
+            <!-- Email -->
+            <a href="mailto:aryanraut53@gmail.com" target="_blank" rel="noopener noreferrer"
+               class="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all duration-200"
+               style="background:var(--accent-muted); border:1px solid var(--accent-border); color:var(--accent)"
+               onmouseover="this.style.background='var(--accent)';this.style.color='#fff';this.style.borderColor='var(--accent)'"
+               onmouseout="this.style.background='var(--accent-muted)';this.style.color='var(--accent)';this.style.borderColor='var(--accent-border)'">
+              <svg class="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="pointer-events:none">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+              </svg>
+              aryanraut53@gmail.com
+            </a>
+
+            <!-- Location -->
+            <a href="https://maps.google.com/?q=Barahathawa,Sarlahi,Nepal" target="_blank" rel="noopener noreferrer"
+               class="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all duration-200"
+               style="background:var(--accent-muted); border:1px solid var(--accent-border); color:var(--accent)"
+               onmouseover="this.style.background='var(--accent)';this.style.color='#fff';this.style.borderColor='var(--accent)'"
+               onmouseout="this.style.background='var(--accent-muted)';this.style.color='var(--accent)';this.style.borderColor='var(--accent-border)'">
+              <svg class="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="pointer-events:none">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+              </svg>
+              Barahathawa, Sarlahi, Nepal
+            </a>
+          </div>
+
+          <!-- Copyright -->
+          <p class="text-[10px] font-bold uppercase tracking-widest" style="color:var(--text-muted)">
+            © 2026 SnapID.Pro
+          </p>
+        </div>
+      </div>
+    </footer>
+
+    <!-- ===== CAMERA MODAL ===== -->
+    <div id="cameraModal" class="cropper-modal-overlay hidden p-4">
+      <div class="rounded-3xl p-8 max-w-2xl w-full shadow-2xl"
+           style="background:var(--surface-elevated); border:1px solid var(--border)">
+        <div class="flex items-center justify-between mb-6">
+          <div>
+            <h3 class="text-xl font-bold" style="color:var(--text-primary)">Take a Photo</h3>
+            <p class="text-[10px] font-bold uppercase tracking-widest mt-1" style="color:var(--text-muted)">Position yourself &amp; capture</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <button id="switchCameraBtn"
+              class="p-2.5 rounded-xl transition-all duration-200"
+              style="background:var(--surface); border:1px solid var(--border); color:var(--text-secondary)"
+              title="Switch Camera">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="pointer-events:none">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+              </svg>
+            </button>
+            <button id="closeCameraBtn"
+              class="p-2.5 rounded-xl transition-all duration-200"
+              style="background:var(--surface); border:1px solid var(--border); color:var(--text-secondary)">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="pointer-events:none">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Live Viewfinder -->
+        <div id="cameraViewfinder" class="relative overflow-hidden rounded-2xl aspect-[4/3] flex items-center justify-center" style="background:#000">
+          <video id="cameraVideo" autoplay playsinline muted class="w-full h-full object-cover"></video>
+          <div class="absolute inset-0 pointer-events-none flex items-center justify-center">
+            <div class="border-2 border-indigo-400/40 rounded-full" style="width:38%; height:56%; box-shadow:0 0 0 9999px rgba(0,0,0,0.35)"></div>
+          </div>
+        </div>
+
+        <!-- Captured Preview -->
+        <div id="capturedPreviewWrap" class="hidden relative overflow-hidden rounded-2xl aspect-[4/3] flex items-center justify-center" style="background:#000">
+          <img id="capturedPreviewImg" class="w-full h-full object-cover" src="" alt="Captured photo"/>
+        </div>
+
+        <!-- Live actions -->
+        <div id="cameraLiveActions" class="flex gap-4 mt-6">
+          <button id="cancelCameraBtn" class="cancel-btn-themed flex-1 px-6 py-4 rounded-xl transition-all">Cancel</button>
+          <button id="captureBtn" class="flex-1 btn-primary px-8 py-4 rounded-xl font-bold text-white flex items-center justify-center gap-2.5">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="pointer-events:none">
+              <circle cx="12" cy="12" r="5" stroke="currentColor" stroke-width="2"/>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/>
+            </svg>
+            Capture
+          </button>
+        </div>
+
+        <!-- Post-capture actions -->
+        <div id="cameraPostActions" class="hidden flex gap-4 mt-6">
+          <button id="retakeBtn" class="cancel-btn-themed flex-1 px-6 py-4 rounded-xl flex items-center justify-center gap-2 transition-all">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="pointer-events:none">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+            </svg>
+            Retake
+          </button>
+          <button id="useCapturedBtn" class="flex-1 btn-primary px-6 py-4 rounded-xl font-bold text-white flex items-center justify-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="pointer-events:none">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+            </svg>
+            Use Photo
+          </button>
+        </div>
+        <canvas id="cameraCanvas" class="hidden"></canvas>
+      </div>
+    </div>
+
+    <!-- ===== CROPPER MODAL ===== -->
+    <div id="cropperModal" class="cropper-modal-overlay hidden p-4">
+      <div class="rounded-3xl p-8 max-w-2xl w-full shadow-2xl"
+           style="background:var(--surface-elevated); border:1px solid var(--border)">
+        <div class="flex items-center justify-between mb-6">
+          <h3 class="text-xl font-bold" style="color:var(--text-primary)">Adjust Crop</h3>
+          <span class="text-[10px] font-bold uppercase tracking-widest" style="color:var(--text-muted)">Passport Aspect Ratio</span>
+        </div>
+        <div class="max-h-[50vh] overflow-hidden rounded-2xl" style="background:#000">
+          <img id="cropModalImage" src="" style="max-width:100%; display:block" />
+        </div>
+        <div class="flex gap-4 mt-8">
+          <button id="cancelCropBtn" class="cancel-btn-themed flex-1 px-6 py-4 rounded-xl transition-all">Cancel</button>
+          <button id="confirmCropBtn" class="flex-1 btn-primary px-6 py-4 rounded-xl font-bold text-white">Apply Selection</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== FEEDBACK BUTTON ===== -->
+    <button id="feedbackBtn"
+      class="fixed bottom-8 right-8 w-14 h-14 rounded-2xl flex items-center justify-center shadow-2xl transition-all z-40 btn-primary hover:scale-110 hover:shadow-indigo-500/30">
+      <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="pointer-events:none">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
+      </svg>
+    </button>
+
+    <!-- ===== FEEDBACK MODAL ===== -->
+    <div id="feedbackModal" class="fixed inset-0 z-[100] hidden items-center justify-center p-4 backdrop-blur-md"
+         style="background:var(--modal-overlay)">
+      <div class="max-w-lg w-full rounded-3xl p-8 shadow-2xl animate-enter"
+           style="background:var(--surface-elevated); border:1px solid var(--border)">
+        <div class="flex items-center justify-between mb-8">
+          <div>
+            <h3 class="text-2xl font-bold" style="color:var(--text-primary)">Feedback</h3>
+            <p class="text-[10px] font-bold uppercase tracking-widest mt-1" style="color:var(--text-muted)">We value your input</p>
+          </div>
+          <button id="closeModal"
+            class="p-2 rounded-xl transition-all"
+            style="color:var(--text-secondary)"
+            onmouseover="this.style.color='var(--text-primary)';this.style.background='var(--surface)'"
+            onmouseout="this.style.color='var(--text-secondary)';this.style.background='transparent'">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="pointer-events:none">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+        <!-- Developer Contact Block -->
+        <div class="rounded-2xl p-4 space-y-3" style="background:var(--accent-muted); border:1px solid var(--accent-border)">
+          <p class="text-[10px] font-bold uppercase tracking-widest mb-3" style="color:var(--accent)">Reach the Developer</p>
+
+          <!-- WhatsApp -->
+          <a href="https://wa.me/9779762122348" target="_blank" rel="noopener noreferrer"
+             class="flex items-center justify-between gap-3 w-full px-4 py-3 rounded-xl transition-all duration-200 group"
+             style="background:var(--surface); border:1px solid var(--border)"
+             onmouseover="this.style.borderColor='var(--accent-border)';this.style.background='var(--surface-elevated)'"
+             onmouseout="this.style.borderColor='var(--border)';this.style.background='var(--surface)'">
+            <div class="flex items-center gap-3">
+              <div class="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style="background:rgba(37,211,102,0.15)">
+                <svg class="w-4 h-4" fill="#25D366" viewBox="0 0 24 24" style="pointer-events:none">
+                  <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
+                  <path d="M12 0C5.373 0 0 5.373 0 12c0 2.124.558 4.117 1.535 5.845L.057 23.5l5.821-1.527A11.94 11.94 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.93 0-3.74-.518-5.295-1.424l-.378-.224-3.925 1.03 1.047-3.816-.246-.393A9.956 9.956 0 012 12C2 6.478 6.478 2 12 2s10 4.478 10 10-4.478 10-10 10z"/>
+                </svg>
+              </div>
+              <div>
+                <p class="text-[9px] font-bold uppercase tracking-widest" style="color:var(--text-muted)">WhatsApp</p>
+                <p class="text-sm font-bold" style="color:var(--text-primary)">+977 9762122348</p>
+              </div>
+            </div>
+            <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="pointer-events:none;color:var(--text-muted)">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+            </svg>
+          </a>
+
+          <!-- Email -->
+          <a href="mailto:aryanraut53@gmail.com" target="_blank" rel="noopener noreferrer"
+             class="flex items-center justify-between gap-3 w-full px-4 py-3 rounded-xl transition-all duration-200"
+             style="background:var(--surface); border:1px solid var(--border)"
+             onmouseover="this.style.borderColor='var(--accent-border)';this.style.background='var(--surface-elevated)'"
+             onmouseout="this.style.borderColor='var(--border)';this.style.background='var(--surface)'">
+            <div class="flex items-center gap-3">
+              <div class="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style="background:var(--accent-muted)">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="pointer-events:none;color:var(--accent)">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                </svg>
+              </div>
+              <div>
+                <p class="text-[9px] font-bold uppercase tracking-widest" style="color:var(--text-muted)">Email</p>
+                <p class="text-sm font-bold" style="color:var(--text-primary)">aryanraut53@gmail.com</p>
+              </div>
+            </div>
+            <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="pointer-events:none;color:var(--text-muted)">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+            </svg>
+          </a>
+
+          <!-- Location -->
+          <a href="https://maps.google.com/?q=Barahathawa,Sarlahi,Nepal" target="_blank" rel="noopener noreferrer"
+             class="flex items-center justify-between gap-3 w-full px-4 py-3 rounded-xl transition-all duration-200"
+             style="background:var(--surface); border:1px solid var(--border)"
+             onmouseover="this.style.borderColor='var(--accent-border)';this.style.background='var(--surface-elevated)'"
+             onmouseout="this.style.borderColor='var(--border)';this.style.background='var(--surface)'">
+            <div class="flex items-center gap-3">
+              <div class="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style="background:var(--accent-muted)">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="pointer-events:none;color:var(--accent)">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                </svg>
+              </div>
+              <div>
+                <p class="text-[9px] font-bold uppercase tracking-widest" style="color:var(--text-muted)">Location</p>
+                <p class="text-sm font-bold" style="color:var(--text-primary)">Barahathawa, Sarlahi, Nepal</p>
+              </div>
+            </div>
+            <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="pointer-events:none;color:var(--text-muted)">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+            </svg>
+          </a>
+        </div>
+
+
+      </div>
+    </div>
+
+    <!-- ===== NOTIFICATION TOAST ===== -->
+    <div id="notification"
+      class="fixed top-24 right-6 px-5 py-4 rounded-2xl transform translate-x-[150%] z-[100] flex items-center gap-3 max-w-xs">
+      <div id="notif-icon" class="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"></div>
+      <div>
+        <p id="notification-message" class="text-sm font-bold leading-snug" style="color:var(--text-primary)"></p>
+        <p id="notification-sub" class="text-[10px] font-medium mt-0.5" style="color:var(--text-secondary)"></p>
+      </div>
+    </div>
+
+    <!-- ===== SCRIPTS ===== -->
+    <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
+    <script>
+      /* =====================================================
+         THEME SYSTEM
+      ===================================================== */
+      const htmlEl = document.getElementById('html-root') || document.documentElement;
+
+      function getTheme() { return htmlEl.classList.contains('dark') ? 'dark' : 'light'; }
+
+      function setTheme(theme) {
+        if (theme === 'dark') { htmlEl.classList.add('dark'); }
+        else { htmlEl.classList.remove('dark'); }
+        localStorage.setItem('snapid-theme', theme);
+      }
+
+      document.getElementById('themeToggle').addEventListener('click', () => {
+        setTheme(getTheme() === 'dark' ? 'light' : 'dark');
+      });
+
+      // Respond to OS preference changes when user has not manually set a theme
+      window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+        if (!localStorage.getItem('snapid-theme')) {
+          setTheme(e.matches ? 'dark' : 'light');
+        }
+      });
+
+      /* =====================================================
+         PARTICLES
+      ===================================================== */
+      particlesJS("particles-js", {
+        particles: {
+          number: { value: 80, density: { enable: true, value_area: 1000 } },
+          color: { value: ["#6366f1", "#a855f7", "#06b6d4"] },
+          shape: { type: "circle" },
+          opacity: { value: 0.55, random: true, anim: { enable: true, speed: 0.5, opacity_min: 0.15, sync: false } },
+          size: { value: 2.5, random: true, anim: { enable: false } },
+          line_linked: { enable: true, distance: 180, color: "#6366f1", opacity: 0.08, width: 1 },
+          move: { enable: true, speed: 1, direction: "none", random: true, straight: false, out_mode: "out", bounce: false },
+        },
+        interactivity: {
+          detect_on: "canvas",
+          events: { onhover: { enable: true, mode: "grab" }, onclick: { enable: true, mode: "push" }, resize: true },
+          modes: { grab: { distance: 160, line_linked: { opacity: 0.35 } }, push: { particles_nb: 3 } },
+        },
+        retina_detect: true,
+      });
+
+      /* =====================================================
+         STATE
+      ===================================================== */
+      let photos = [];
+      let nextId = 0;
+      let activeCropper = null;
+      let pendingCropId = null;
+
+      /* =====================================================
+         DOM REFS
+      ===================================================== */
+      const dropZone        = document.getElementById("dropZone");
+      const dropZoneInner   = dropZone.querySelector(".drop-zone-inner");
+      const imageInput      = document.getElementById("imageInput");
+      const photoList       = document.getElementById("photoList");
+      const addMoreWrapper  = document.getElementById("addMoreWrapper");
+      const addMoreBtn      = document.getElementById("addMoreBtn");
+      const generateBtn     = document.getElementById("generateBtn");
+      const downloadBtn     = document.getElementById("downloadBtn");
+      const pdfPreview      = document.getElementById("pdfPreview");
+      const loading         = document.getElementById("loading");
+      const loadingMsg      = document.getElementById("loadingMsg");
+      const progressBar     = document.getElementById("progressBar");
+      const estTimeLabel    = document.getElementById("estTimeLabel");
+      const perfSpeed       = document.getElementById("perfSpeed");
+      const toggleAdvanced  = document.getElementById("toggleAdvanced");
+      const advancedOptions = document.getElementById("advancedOptions");
+      const advancedChevron = document.getElementById("advancedChevron");
+      const cropperModal    = document.getElementById("cropperModal");
+      const cropModalImage  = document.getElementById("cropModalImage");
+      const confirmCropBtn  = document.getElementById("confirmCropBtn");
+      const cancelCropBtn   = document.getElementById("cancelCropBtn");
+      const notification    = document.getElementById("notification");
+      const notifMsg        = document.getElementById("notification-message");
+      const notifSub        = document.getElementById("notification-sub");
+      const notifIcon       = document.getElementById("notif-icon");
+      const feedbackBtn     = document.getElementById("feedbackBtn");
+      const feedbackModal   = document.getElementById("feedbackModal");
+      const closeModal      = document.getElementById("closeModal");
+
+
+      /* =====================================================
+         PROCESSING STEPS & PROGRESS SIMULATION
+      ===================================================== */
+      let stepTimer = null;
+      let progressTimer = null;
+      let perfInterval = null;
+      let estSeconds = 0;
+      let currentProgress = 0;
+
+      function startProcessingSteps() {
+        const steps = [
+          { id: "step1", line: "line1", msg: "Removing Background" },
+          { id: "step2", line: "line2", msg: "Enhancing Output" },
+          { id: "step3", line: null,    msg: "Finalizing PDF Content" },
+        ];
+        
+        // Reset state
+        currentProgress = 0;
+        progressBar.style.width = "0%";
+        estSeconds = Math.max(5, photos.length * 4); // ~4s per photo
+        estTimeLabel.textContent = `Est. ${estSeconds}s remaining`;
+        
+        // Fictional Speed Simulation
+        const updatePerf = () => {
+          const speed = (Math.random() * (1200 - 450) + 450).toFixed(1);
+          perfSpeed.textContent = `SPEED: ${speed} MB/s`;
+        };
+        updatePerf();
+        perfInterval = setInterval(updatePerf, 2000);
+
+        // Progress Bar Simulation
+        const start = Date.now();
+        progressTimer = setInterval(() => {
+          const elapsed = (Date.now() - start) / 1000;
+          const remaining = Math.max(1, Math.ceil(estSeconds - elapsed));
+          estTimeLabel.textContent = `Est. ${remaining}s remaining`;
+
+          // Instant start: 0-30% in first 500ms
+          if (elapsed < 0.5) {
+            currentProgress = (elapsed / 0.5) * 30;
+          } else {
+            // Logarithmic slowing: reach 98% at estSeconds
+            const norm = (elapsed - 0.5) / Math.max(0.1, estSeconds - 0.5);
+            currentProgress = 30 + (Math.atan(norm * 5) / (Math.PI / 2)) * 68;
+          }
+          
+          if (currentProgress > 98.7) currentProgress = 98.7; // Stall at end
+          progressBar.style.width = `${currentProgress}%`;
+        }, 100);
+
+        let stepIdx = 0;
+        const updateStep = () => {
+          steps.forEach((s, idx) => {
+            const el = document.getElementById(s.id);
+            const ln = s.line ? document.getElementById(s.line) : null;
+            if (el) {
+              el.classList.toggle("active", idx === stepIdx);
+              el.classList.toggle("done",   idx < stepIdx);
+            }
+            if (ln) ln.classList.toggle("done", idx < stepIdx);
+          });
+          if (stepIdx < steps.length) {
+            loadingMsg.innerHTML = steps[stepIdx].msg + '<span class="dot-anim"><span>.</span><span>.</span><span>.</span></span>';
+            stepIdx++;
+            stepTimer = setTimeout(updateStep, (estSeconds * 1000) / 3);
+          }
+        };
+        updateStep();
+
+        // Return cleanup function
+        return () => {
+          clearInterval(progressTimer);
+          clearInterval(perfInterval);
+          clearTimeout(stepTimer);
+          progressBar.style.width = "100%";
+          estTimeLabel.textContent = "Processing Complete";
+          
+          // Mark all steps as done
+          steps.forEach((s) => {
+            const el = document.getElementById(s.id);
+            const ln = s.line ? document.getElementById(s.line) : null;
+            if (el) { el.classList.remove("active"); el.classList.add("done"); }
+            if (ln) ln.classList.add("done");
+          });
+        };
+      }
+
+      /* =====================================================
+         NOTIFICATION
+      ===================================================== */
+      let notifTimeout = null;
+      function showNotification(msg, isError = true, sub = "") {
+        clearTimeout(notifTimeout);
+        notifMsg.textContent = msg;
+        notifSub.textContent = sub || (isError ? "Action Failed" : "Step Completed");
+        notifIcon.className = `w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${isError ? "bg-rose-500/20 text-rose-400" : "bg-emerald-500/20 text-emerald-400"}`;
+        notifIcon.innerHTML = isError
+          ? `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="pointer-events:none"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>`
+          : `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="pointer-events:none"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>`;
+        notification.classList.remove("translate-x-[150%]");
+        notification.classList.add("translate-x-0");
+        notifTimeout = setTimeout(() => {
+          notification.classList.remove("translate-x-0");
+          notification.classList.add("translate-x-[150%]");
+        }, 4000);
+      }
+
+      /* =====================================================
+         RIPPLE
+      ===================================================== */
+      function addRipple(btn, e) {
+        const rect = btn.getBoundingClientRect();
+        const size = Math.max(rect.width, rect.height);
+        const r = document.createElement("span");
+        r.className = "ripple";
+        r.style.width = r.style.height = size + "px";
+        r.style.left = (e.clientX - rect.left - size / 2) + "px";
+        r.style.top  = (e.clientY - rect.top  - size / 2) + "px";
+        btn.appendChild(r);
+        setTimeout(() => r.remove(), 700);
+      }
+      generateBtn.addEventListener("click", (e) => addRipple(generateBtn, e));
+      downloadBtn.addEventListener("click", (e) => addRipple(downloadBtn, e));
+
+      /* =====================================================
+         RENDER PHOTO CARDS
+      ===================================================== */
+      function renderPhotoList() {
+        photoList.innerHTML = "";
+        photos.forEach((photo, idx) => {
+          const card = document.createElement("div");
+          card.className = "photo-card rounded-2xl p-4 flex items-center gap-5";
+          card.style.animationDelay = (idx * 0.06) + "s";
+          card.innerHTML = `
+            <div class="relative flex-shrink-0">
+              <img src="${photo.previewUrl}" class="w-14 h-[72px] object-cover rounded-xl"
+                   style="border:1px solid var(--border)" />
+              ${photo.croppedFile ? `
+                <div class="absolute -top-1.5 -right-1.5 bg-indigo-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-md leading-none">
+                  FIXED
+                </div>` : ""}
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center gap-2 mb-1">
+                <p class="text-sm font-bold truncate" style="color:var(--text-primary)">${photo.originalFile.name}</p>
+                <span class="hidden sm:inline-flex px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider whitespace-nowrap"
+                      style="background:var(--accent-muted); color:var(--accent); border:1px solid var(--accent-border)">
+                  AI Enhanced
+                </span>
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="text-[10px] font-bold uppercase tracking-wider" style="color:var(--text-muted)">
+                  ${photo.croppedFile ? "Custom Crop" : "Original"}
+                </span>
+                <span class="w-1 h-1 rounded-full" style="background:var(--border)"></span>
+                <span class="text-[10px] font-bold uppercase tracking-wider" style="color:var(--accent)">
+                  ${photo.copies} Copies
+                </span>
+              </div>
+            </div>
+            <div class="card-meta-bg flex flex-col items-center gap-0.5 px-3 py-2 rounded-xl">
+              <span class="text-[9px] font-bold uppercase tracking-wider" style="color:var(--text-muted)">Copies</span>
+              <input type="number" value="${photo.copies}" min="1" max="54"
+                class="card-meta-input" data-id="${photo.id}" />
+            </div>
+            <div class="flex gap-2 flex-shrink-0">
+              <button class="crop-btn p-2.5 rounded-xl transition-all duration-200"
+                style="background:var(--accent-muted); color:var(--accent); border:1px solid var(--accent-border)"
+                data-id="${photo.id}" title="Crop Photo"
+                onmouseover="this.style.background='var(--accent)';this.style.color='#fff';this.style.borderColor='var(--accent)'"
+                onmouseout="this.style.background='var(--accent-muted)';this.style.color='var(--accent)';this.style.borderColor='var(--accent-border)'">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="pointer-events:none">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/>
+                </svg>
+              </button>
+              <button class="remove-btn p-2.5 rounded-xl transition-all duration-200"
+                style="background:rgba(244,63,94,0.1); color:#f43f5e; border:1px solid rgba(244,63,94,0.22)"
+                data-id="${photo.id}" title="Remove"
+                onmouseover="this.style.background='#f43f5e';this.style.color='#fff';this.style.borderColor='#f43f5e'"
+                onmouseout="this.style.background='rgba(244,63,94,0.1)';this.style.color='#f43f5e';this.style.borderColor='rgba(244,63,94,0.22)'">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="pointer-events:none">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                </svg>
+              </button>
+            </div>`;
+          photoList.appendChild(card);
+        });
+
+        photoList.querySelectorAll("input[type=number]").forEach((input) => {
+          input.addEventListener("change", (e) => {
+            const id = parseInt(e.currentTarget.dataset.id);
+            const p = photos.find((ph) => ph.id === id);
+            if (p) p.copies = Math.max(1, parseInt(e.currentTarget.value) || 1);
+          });
+        });
+        photoList.querySelectorAll(".crop-btn").forEach((btn) => {
+          btn.addEventListener("click", () => openCropper(parseInt(btn.dataset.id)));
+        });
+        photoList.querySelectorAll(".remove-btn").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            photos = photos.filter((p) => p.id !== parseInt(btn.dataset.id));
+            renderPhotoList();
+            if (photos.length === 0) addMoreWrapper.classList.add("hidden");
+          });
+        });
+
+        addMoreWrapper.classList.toggle("hidden", photos.length === 0);
+      }
+
+      /* =====================================================
+         ADD FILES
+      ===================================================== */
+      function addFiles(files) {
+        const validTypes = ["image/jpeg","image/jpg","image/png","image/webp"];
+        let added = 0;
+        Array.from(files).forEach((file) => {
+          if (!validTypes.includes(file.type)) return;
+          photos.push({ id: nextId++, originalFile: file, croppedFile: null, previewUrl: URL.createObjectURL(file), copies: 6 });
+          added++;
+        });
+        if (added === 0) showNotification("Please upload valid image files (JPG, PNG, WEBP).");
+        renderPhotoList();
+      }
+
+      /* =====================================================
+         DROP ZONE
+      ===================================================== */
+      dropZone.addEventListener("click", () => imageInput.click());
+      dropZone.addEventListener("dragover", (e) => { e.preventDefault(); dropZoneInner.classList.add("drag-over"); });
+      dropZone.addEventListener("dragleave", (e) => { if (!dropZone.contains(e.relatedTarget)) dropZoneInner.classList.remove("drag-over"); });
+      dropZone.addEventListener("drop", (e) => { e.preventDefault(); dropZoneInner.classList.remove("drag-over"); addFiles(e.dataTransfer.files); });
+      imageInput.addEventListener("change", () => { addFiles(imageInput.files); imageInput.value = ""; });
+      addMoreBtn.addEventListener("click", () => imageInput.click());
+
+      /* =====================================================
+         CROPPER
+      ===================================================== */
+      function openCropper(id) {
+        const photo = photos.find((p) => p.id === id);
+        if (!photo) return;
+        pendingCropId = id;
+        cropModalImage.src = photo.previewUrl;
+        cropperModal.classList.remove("hidden");
+        if (activeCropper) activeCropper.destroy();
+        activeCropper = new Cropper(cropModalImage, { aspectRatio: 384/472, viewMode: 1, dragMode: "move", autoCropArea: 1 });
+      }
+      confirmCropBtn.addEventListener("click", () => {
+        if (!activeCropper || pendingCropId === null) return;
+        activeCropper.getCroppedCanvas({ width: 400, height: 480 }).toBlob((blob) => {
+          const photo = photos.find((p) => p.id === pendingCropId);
+          if (!photo) return;
+          photo.croppedFile = new File([blob], "cropped-" + photo.originalFile.name, { type: "image/png" });
+          photo.previewUrl = URL.createObjectURL(blob);
+          activeCropper.destroy(); activeCropper = null; pendingCropId = null;
+          cropperModal.classList.add("hidden");
+          renderPhotoList();
+          showNotification("Photo cropped successfully.", false);
+        }, "image/png");
+      });
+      cancelCropBtn.addEventListener("click", () => {
+        if (activeCropper) { activeCropper.destroy(); activeCropper = null; }
+        pendingCropId = null;
+        cropperModal.classList.add("hidden");
+      });
+
+      /* =====================================================
+         ENHANCE MODE
+      ===================================================== */
+      let selectedEnhanceMode = "auto";
+      const detectedModeLabel = document.getElementById("detectedModeLabel");
+      const MODE_LABELS = {
+        dark:   "🌙 Low Light → Brightened",
+        warm:   "🎨 Warm Tone → Color Corrected",
+        normal: "⚖️ Natural → Enhanced",
+      };
+      document.querySelectorAll(".enhance-btn").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          document.querySelectorAll(".enhance-btn").forEach((b) => b.classList.remove("active-mode"));
+          btn.classList.add("active-mode");
+          selectedEnhanceMode = btn.dataset.mode;
+          if (selectedEnhanceMode !== "auto") detectedModeLabel.classList.add("hidden");
+        });
+      });
+
+      /* =====================================================
+         ADVANCED OPTIONS
+      ===================================================== */
+      toggleAdvanced.addEventListener("click", () => {
+        const visible = advancedOptions.classList.contains("block");
+        advancedOptions.classList.toggle("hidden", visible);
+        advancedOptions.classList.toggle("block", !visible);
+        advancedChevron.style.transform = visible ? "rotate(0deg)" : "rotate(180deg)";
+      });
+
+      /* =====================================================
+         GENERATE PDF
+      ===================================================== */
+      generateBtn.addEventListener("click", () => {
+        if (photos.length === 0) { showNotification("Please upload at least one photo."); return; }
+
+        const formData = new FormData();
+        photos.forEach((photo, i) => {
+          formData.append(`image_${i}`, photo.croppedFile || photo.originalFile);
+          formData.append(`copies_${i}`, photo.copies);
+        });
+        formData.append("width",        document.getElementById("width").value);
+        formData.append("height",       document.getElementById("height").value);
+        formData.append("spacing",      document.getElementById("spacing").value);
+        formData.append("border",       document.getElementById("border").value);
+        formData.append("enhance_mode", selectedEnhanceMode);
+        
+        const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+        loading.classList.remove("hidden");
+        const stopProcessing = startProcessingSteps();
+        generateBtn.disabled = true;
+        downloadBtn.classList.add("hidden");
+        detectedModeLabel.classList.add("hidden");
+        document.getElementById("previewArea").classList.add("hidden");
+
+        let _detectedMode = null;
+        fetch("/process", { 
+          method: "POST", 
+          body: formData,
+          headers: {
+            "X-CSRF-TOKEN": csrfToken
+          }
+        })
+          .then(async (res) => {
+            _detectedMode = res.headers.get("X-Detected-Mode");
+            if (res.status === 429) { showNotification("API Quota Exceeded. Please try again later."); return null; }
+            if (res.status === 410) { showNotification("Cannot detect face/background in one of the images."); return null; }
+            if (res.status === 500) { showNotification("Internal server error. Please try again."); return null; }
+            if (!res.ok) throw new Error("Processing failed.");
+            return res.blob();
+          })
+          .then((blob) => {
+            stopProcessing();
+            if (!blob) return;
+            if (selectedEnhanceMode === "auto" && _detectedMode && MODE_LABELS[_detectedMode]) {
+              detectedModeLabel.textContent = "AI detected: " + MODE_LABELS[_detectedMode];
+              detectedModeLabel.classList.remove("hidden");
+            }
+            const url = URL.createObjectURL(blob);
+            document.getElementById("previewArea").classList.remove("hidden");
+            pdfPreview.src = url;
+            downloadBtn.href = url;
+            downloadBtn.classList.remove("hidden");
+            showNotification("PDF generated successfully!", false, "Ready to download");
+          })
+          .catch((err) => { console.error(err); showNotification("Image processing failed. Please try again."); })
+          .finally(() => { loading.classList.add("hidden"); stopProcessing(); generateBtn.disabled = false; });
+      });
+
+      /* =====================================================
+         CAMERA
+      ===================================================== */
+      const cameraModal         = document.getElementById("cameraModal");
+      const cameraVideo         = document.getElementById("cameraVideo");
+      const cameraCanvas        = document.getElementById("cameraCanvas");
+      const captureBtn          = document.getElementById("captureBtn");
+      const retakeBtn           = document.getElementById("retakeBtn");
+      const useCapturedBtn      = document.getElementById("useCapturedBtn");
+      const closeCameraBtn      = document.getElementById("closeCameraBtn");
+      const cancelCameraBtn     = document.getElementById("cancelCameraBtn");
+      const switchCameraBtn     = document.getElementById("switchCameraBtn");
+      const cameraViewfinder    = document.getElementById("cameraViewfinder");
+      const capturedPreviewWrap = document.getElementById("capturedPreviewWrap");
+      const capturedPreviewImg  = document.getElementById("capturedPreviewImg");
+      const cameraLiveActions   = document.getElementById("cameraLiveActions");
+      const cameraPostActions   = document.getElementById("cameraPostActions");
+      const openCameraBtn       = document.getElementById("openCameraBtn");
+
+      let cameraStream = null;
+      let facingMode = "user";
+      let capturedBlob = null;
+
+      async function startCamera() {
+        if (cameraStream) stopCamera();
+        try {
+          cameraStream = await navigator.mediaDevices.getUserMedia({
+            video: { facingMode, width: { ideal: 1280 }, height: { ideal: 960 } }, audio: false
+          });
+          cameraVideo.srcObject = cameraStream;
+        } catch (err) {
+          console.error("Camera access error:", err);
+          showNotification("Camera access denied. Please allow camera permissions.", true, "Permission Required");
+          closeCameraModal();
+        }
+      }
+
+      function stopCamera() {
+        if (cameraStream) { cameraStream.getTracks().forEach(t => t.stop()); cameraStream = null; }
+        cameraVideo.srcObject = null;
+      }
+
+      function openCameraModal() {
+        capturedBlob = null;
+        cameraViewfinder.classList.remove("hidden");
+        capturedPreviewWrap.classList.add("hidden");
+        cameraLiveActions.classList.remove("hidden");
+        cameraPostActions.classList.add("hidden");
+        cameraModal.classList.remove("hidden");
+        startCamera();
+      }
+
+      function closeCameraModal() {
+        stopCamera();
+        cameraModal.classList.add("hidden");
+        capturedBlob = null;
+      }
+
+      openCameraBtn.addEventListener("click", openCameraModal);
+      closeCameraBtn.addEventListener("click", closeCameraModal);
+      cancelCameraBtn.addEventListener("click", closeCameraModal);
+
+      switchCameraBtn.addEventListener("click", () => {
+        facingMode = facingMode === "user" ? "environment" : "user";
+        startCamera();
+      });
+
+      captureBtn.addEventListener("click", () => {
+        cameraCanvas.width  = cameraVideo.videoWidth  || 1280;
+        cameraCanvas.height = cameraVideo.videoHeight || 960;
+        const ctx = cameraCanvas.getContext("2d");
+        if (facingMode === "user") { ctx.translate(cameraCanvas.width, 0); ctx.scale(-1, 1); }
+        ctx.drawImage(cameraVideo, 0, 0, cameraCanvas.width, cameraCanvas.height);
+        cameraCanvas.toBlob((blob) => {
+          capturedBlob = blob;
+          capturedPreviewImg.src = URL.createObjectURL(blob);
+          cameraViewfinder.classList.add("hidden");
+          capturedPreviewWrap.classList.remove("hidden");
+          cameraLiveActions.classList.add("hidden");
+          cameraPostActions.classList.remove("hidden");
+          stopCamera();
+        }, "image/png");
+      });
+
+      retakeBtn.addEventListener("click", () => {
+        capturedBlob = null;
+        capturedPreviewWrap.classList.add("hidden");
+        cameraViewfinder.classList.remove("hidden");
+        cameraPostActions.classList.add("hidden");
+        cameraLiveActions.classList.remove("hidden");
+        startCamera();
+      });
+
+      useCapturedBtn.addEventListener("click", () => {
+        if (!capturedBlob) return;
+        const file = new File([capturedBlob], `camera-capture-${Date.now()}.png`, { type: "image/png" });
+        photos.push({ id: nextId++, originalFile: file, croppedFile: null, previewUrl: URL.createObjectURL(capturedBlob), copies: 6 });
+        renderPhotoList();
+        showNotification("Photo captured and added!", false, "Ready to enhance");
+        closeCameraModal();
+      });
+
+      cameraVideo.addEventListener("loadedmetadata", () => {
+        cameraVideo.style.transform = facingMode === "user" ? "scaleX(-1)" : "scaleX(1)";
+      });
+      switchCameraBtn.addEventListener("click", () => {
+        cameraVideo.style.transform = facingMode === "user" ? "scaleX(-1)" : "scaleX(1)";
+      }, true);
+
+      /* =====================================================
+         TOKEN GATE
+      ===================================================== */
+      (function () {
+        const gate        = document.getElementById("tokenGate");
+        const tokenInput  = document.getElementById("tokenInput");
+        const tokenSubmit = document.getElementById("tokenSubmitBtn");
+        const tokenError  = document.getElementById("tokenError");
+
+        if (!gate || gate.classList.contains("hidden")) return; // already authenticated server-side
+
+        function setLoading(on) {
+          tokenSubmit.disabled = on;
+          tokenSubmit.querySelector("span").textContent = on ? "Validating…" : "Unlock Access";
+        }
+
+        async function submitToken() {
+          const token = tokenInput.value.trim();
+          if (!token) { tokenInput.focus(); return; }
+          tokenError.classList.add("hidden");
+          setLoading(true);
+          try {
+            const hp_value = document.getElementById("hp_field").value;
+            const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+            const res = await fetch("/validate-token", {
+              method: "POST",
+              headers: { 
+                "Content-Type": "application/json",
+                "X-CSRF-TOKEN": csrfToken
+              },
+              body: JSON.stringify({ token, hp_field: hp_value }),
+            });
+            const json = await res.json();
+            if (json.ok) {
+              gate.style.opacity = "0";
+              gate.style.transition = "opacity 0.5s ease";
+              setTimeout(() => gate.classList.add("hidden"), 500);
+            } else {
+              const msg = json.error || "Invalid or expired token.";
+              tokenError.textContent = msg.includes("already used")
+                ? "❌ This token has already been used. Each token is single-use only."
+                : "❌ Invalid or expired token. Please try again.";
+              tokenError.classList.remove("hidden");
+              tokenInput.select();
+            }
+          } catch (e) {
+            console.error("Token verification failed:", e);
+            tokenError.textContent = "❌ Access error. (" + (e.message || "Network issue") + ")";
+            tokenError.classList.remove("hidden");
+          } finally {
+            setLoading(false);
+          }
+        }
+
+        tokenSubmit.addEventListener("click", submitToken);
+        tokenInput.addEventListener("keydown", (e) => { if (e.key === "Enter") submitToken(); });
+      })();
+
+      /* =====================================================
+         FEEDBACK
+      ===================================================== */
+      feedbackBtn.addEventListener("click", () => { feedbackModal.classList.remove("hidden"); feedbackModal.classList.add("flex"); });
+      closeModal.addEventListener("click", () => { feedbackModal.classList.add("hidden"); feedbackModal.classList.remove("flex"); });
+      feedbackModal.addEventListener("click", (e) => {
+        if (e.target === feedbackModal) { feedbackModal.classList.add("hidden"); feedbackModal.classList.remove("flex"); }
+      });
+
+    </script>
+  </body>
+</html>

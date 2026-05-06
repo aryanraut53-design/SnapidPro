@@ -1,0 +1,9 @@
+pillow
+flask
+requests
+cloudinary
+python-dotenv
+Flask-Limiter
+Flask-WTF
+gunicorn==21.2.0
+waitress==3.0.0

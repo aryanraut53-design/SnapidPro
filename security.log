@@ -1,0 +1,12 @@
+2026-05-06 16:18:23,911 - WARNING - [FAILED_TOKEN_ATTEMPT] IP: 127.0.0.1 | UA: LenovoVantage/3.0.0.191 | Details: Token: SNAP-TEST-123
+2026-05-06 16:18:25,262 - WARNING - [FAILED_TOKEN_ATTEMPT] IP: 127.0.0.1 | UA: LenovoVantage/3.0.0.191 | Details: Token: SNAP-TEST-123
+2026-05-06 16:18:26,387 - WARNING - [FAILED_TOKEN_ATTEMPT] IP: 127.0.0.1 | UA: LenovoVantage/3.0.0.191 | Details: Token: SNAP-TEST-123
+2026-05-06 16:18:27,205 - WARNING - [FAILED_TOKEN_ATTEMPT] IP: 127.0.0.1 | UA: LenovoVantage/3.0.0.191 | Details: Token: SNAP-TEST-123
+2026-05-06 16:18:28,558 - WARNING - [FAILED_TOKEN_ATTEMPT] IP: 127.0.0.1 | UA: LenovoVantage/3.0.0.191 | Details: Token: SNAP-TEST-123
+2026-05-06 16:18:28,560 - WARNING - [TOKEN_VALIDATED_URL] IP: 127.0.0.1 | UA: LenovoVantage/3.0.0.191 | Details: Token: SNAP-DEV-TEST
+2026-05-06 16:21:26,135 - WARNING - [USED_TOKEN_ATTEMPT] IP: 127.0.0.1 | UA: Mozilla/5.0 (Linux; Android 13; SM-G981B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Mobile Safari/537.36 | Details: Token: SNAP-DEV-TEST
+2026-05-06 16:22:17,562 - WARNING - [USED_TOKEN_ATTEMPT] IP: 127.0.0.1 | UA: Mozilla/5.0 (Linux; Android 13; SM-G981B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Mobile Safari/537.36 | Details: Token: SNAP-DEV-TEST
+2026-05-06 16:24:14,459 - WARNING - [TOKEN_VALIDATED] IP: 127.0.0.1 | UA: Mozilla/5.0 (Linux; Android 13; SM-G981B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Mobile Safari/537.36 | Details: Token: SNAP-DEV-TEST
+2026-05-06 16:25:19,684 - WARNING - [SESSION_FINGERPRINT_MISMATCH] IP: 127.0.0.1 | UA: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36 | Details: Likely session hijacking attempt
+2026-05-06 16:28:31,153 - WARNING - [TOKEN_VALIDATED] IP: 127.0.0.1 | UA: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36 | Details: Token: SNAP-DEV-TEST
+2026-05-06 16:28:34,408 - WARNING - [TOKEN_VALIDATED_URL] IP: 127.0.0.1 | UA: LenovoVantage/3.0.0.191 | Details: Token: SNAP-DEV-TEST
