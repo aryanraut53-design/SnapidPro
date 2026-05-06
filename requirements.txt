@@ -7,3 +7,4 @@ Flask-Limiter
 Flask-WTF
 gunicorn==21.2.0
 waitress==3.0.0
+supabase==2.11.0

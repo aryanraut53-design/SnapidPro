@@ -16,6 +16,7 @@ from flask_wtf.csrf import CSRFProtect, generate_csrf
 import hashlib
 import re
 import logging
+from supabase import create_client, Client
 import time
 
 # Load environment variables from .env file
@@ -31,12 +32,11 @@ logger = logging.getLogger(__name__)
 
 from tokens import ACCESS_TOKENS
 
-# ---- Security Logging ----
+# ---- Security Logging (stdout only for Serverless) ----
 security_logger = logging.getLogger("security")
 security_logger.setLevel(logging.WARNING)
-handler = logging.FileHandler("security.log")
-handler.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(message)s'))
-security_logger.addHandler(handler)
+# On Vercel, logs from StreamHandler (stdout/stderr) are automatically captured
+security_logger.addHandler(logging.StreamHandler())
 
 def log_security_event(event_type, details):
     ip = request.remote_addr
@@ -59,6 +59,8 @@ CLOUDINARY_CLOUD_NAME = os.getenv("CLOUDINARY_CLOUD_NAME")
 CLOUDINARY_API_KEY = os.getenv("CLOUDINARY_API_KEY")
 CLOUDINARY_API_SECRET = os.getenv("CLOUDINARY_API_SECRET")
 FLASK_SECRET_KEY = os.getenv("FLASK_SECRET_KEY")
+SUPABASE_URL = os.getenv("SUPABASE_URL")
+SUPABASE_KEY = os.getenv("SUPABASE_KEY")
 
 # Strict check for required production keys
 if not all([REMOVE_BG_API_KEY, CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET]):
@@ -68,33 +70,31 @@ if not FLASK_SECRET_KEY:
     logger.warning("FLASK_SECRET_KEY not set. Using a fallback, but this is insecure for production.")
     FLASK_SECRET_KEY = "insecure-fallback-key"
 
-# ---- Token Persistence ----
-import json as _json
-_USED_FILE = os.path.join(os.path.dirname(__file__), "used_tokens.json")
-
-def _load_used() -> set:
+# ---- Token Persistence (Supabase) ----
+supabase: Client = None
+if SUPABASE_URL and SUPABASE_KEY:
     try:
-        if not os.path.exists(_USED_FILE): return set()
-        with open(_USED_FILE, "r") as f:
-            return set(_json.load(f))
-    except Exception: return set()
+        supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
+    except Exception as e:
+        logger.error(f"Failed to initialize Supabase: {e}")
 
-def _save_used(used: set):
-    try:
-        with open(_USED_FILE, "w") as f:
-            _json.dump(list(used), f)
-    except Exception: pass
-
-USED_TOKENS: set = _load_used()
-
-# ---- Token Validation Logic (Cleaned up) ----
 def token_valid(token: str) -> bool:
     if token == "SNAP-DEV-TEST":
         return True
     if not token or token not in ACCESS_TOKENS:
         return False
-    if token in USED_TOKENS:
-        return False
+
+    # Check if used in database
+    if supabase:
+        try:
+            result = supabase.table("used_tokens").select("token").eq("token", token).execute()
+            if result.data:
+                return False
+        except Exception as e:
+            logger.error(f"Database error during token validation: {e}")
+            # Fail closed for security
+            return False
+            
     expiry = ACCESS_TOKENS[token]
     if expiry is None:
         return True
@@ -105,8 +105,11 @@ def consume_token(token: str):
     if token == "SNAP-DEV-TEST":
         return
     if token in ACCESS_TOKENS:
-        USED_TOKENS.add(token)
-        _save_used(USED_TOKENS)
+        if supabase:
+            try:
+                supabase.table("used_tokens").insert({"token": token}).execute()
+            except Exception as e:
+                logger.error(f"Failed to consume token in database: {e}")
 
 # ---- Smart Enhancement Presets ----
 ENHANCE_PRESETS = {
